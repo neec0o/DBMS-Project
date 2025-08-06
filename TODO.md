@@ -1,21 +1,11 @@
-com.example.dbms
-├── controller
-│   └── ConnectionController.java       ← POST /connect
-│   └── DatabaseController.java         ← GET /databases
-├── model
-│   └── ConnectionRequest.java
-│   └── DbSession.java                  ← Speichert Connection pro Session
-├── service
-│   └── DbSessionService.java           ← Sessionverwaltung (Map)
-│   └── DatabaseService.java            ← Datenbankliste holen
 
 
-[] Login-Formular
-    - Formular: Host, Port, Benutzername, Passwort, DB-Typ (MySQL, Postgres…)
-    - Backend: Verbindungsversuch zu DB über JDBC
-    - Bei Erfolg: Session mit JDBC-Connection speichern (oder Pool)
+[x] Login-Formular
+    x- Formular: Host, Port, Benutzername, Passwort, DB-Typ (MySQL, Postgres…)
+    x- Backend: Verbindungsversuch zu DB über JDBC
+    x- Bei Erfolg: Session mit JDBC-Connection speichern (oder Pool)
     - Nach lokalen DB suchen?
-[] JDBC-Verbindung managen
+[x] JDBC-Verbindung managen
         Connection conn = DriverManager.getConnection(
         "jdbc:mysql://localhost:3306/",
         "user", "password");
