@@ -46,7 +46,6 @@ public class ConnectionController {
                     "mysql" -> "jdbc:mysql://" + req.getHost() + ":" + req.getPort() + "/";
             case
                     "postgresql" -> "jdbc:postgresql://" + req.getHost() + ":" + req.getPort() + "/";
-
             default -> throw new IllegalArgumentException("Unsupported DB type: " + req.getDbType());
         };
     }

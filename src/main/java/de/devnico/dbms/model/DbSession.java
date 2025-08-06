@@ -1,21 +1,17 @@
 package de.devnico.dbms.model;
 
+import lombok.Getter;
+
 import java.sql.Connection;
 
+@Getter
 public class DbSession {
-    private String id;
-    private Connection connection;
+    private final String id;
+    private final Connection connection;
 
     public DbSession(String id, Connection connection) {
         this.id = id;
         this.connection = connection;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public Connection getConnection() {
-        return connection;
-    }
 }

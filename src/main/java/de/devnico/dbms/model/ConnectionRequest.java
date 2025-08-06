@@ -1,5 +1,8 @@
 package de.devnico.dbms.model;
 
+import lombok.Getter;
+
+@Getter
 public class ConnectionRequest {
     private String dbType;
     private String host;
@@ -8,27 +11,4 @@ public class ConnectionRequest {
     private String username;
     private String password;
 
-    public String getDbType() {
-        return dbType;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public String getDatabase() {
-        return database;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
 }
