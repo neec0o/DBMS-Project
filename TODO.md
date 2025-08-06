@@ -1,14 +1,13 @@
-dbms-springboot/
-├── src/
-│   ├── main/
-│   │   ├── java/com/yourapp/
-│   │   │   ├── controller/
-│   │   │   ├── service/
-│   │   │   ├── model/
-│   │   │   └── DbmsApplication.java
-│   │   └── resources/
-│   │       ├── application.yml
-│   │       └── templates/ (wenn Thymeleaf)
+com.example.dbms
+├── controller
+│   └── ConnectionController.java       ← POST /connect
+│   └── DatabaseController.java         ← GET /databases
+├── model
+│   └── ConnectionRequest.java
+│   └── DbSession.java                  ← Speichert Connection pro Session
+├── service
+│   └── DbSessionService.java           ← Sessionverwaltung (Map)
+│   └── DatabaseService.java            ← Datenbankliste holen
 
 
 [] Login-Formular
