@@ -14,9 +14,9 @@
       "user", 
       "password"
   );
-- [] Datenbanken erstellen 
-- [] Tabellen erstellen 
+- [x] Datenbanken erstellen 
+- [x] Tabellen erstellen 
 - [] Key zuweisungen 
-- [] Suchen in der Datenbank 
+- [x] Suchen in der Datenbank 
 - [] Datenbank- und Tabellenanzeigen - Tabellenansicht im Frontend 
 - [] Freie SQL-Konsole - User kann SQL eintippen → absenden → Ergebnis wird in Tabellenform zurückgegeben
