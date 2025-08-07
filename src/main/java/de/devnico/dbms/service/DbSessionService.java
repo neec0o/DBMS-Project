@@ -3,6 +3,8 @@ package de.devnico.dbms.service;
 import de.devnico.dbms.model.DbSession;
 import org.springframework.stereotype.Service;
 
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,4 +23,11 @@ public class DbSessionService {
     public DbSession getSession(String id) {
         return sessions.get(id);
     }
+
+    public String connect(String host, String port, String username, String password) throws SQLException {
+        String url = "jdbc:mysql://" + host + ":" + port + "?useSSL=false&allowPublicKeyRetrieval=true";
+        Connection connection = DriverManager.getConnection(url, username, password);
+        return createSession(connection);
+    }
+
 }

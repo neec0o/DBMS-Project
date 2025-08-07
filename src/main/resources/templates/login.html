@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+<h1>Datenbank Login</h1>
+
+<form id="loginForm">
+    <label>DB-Typ:
+        <select name="dbType">
+            <option value="mysql">MySQL</option>
+            <option value="postgresql">PostgreSQL</option>
+        </select>
+    </label><br>
+    <label>Host: <input type="text" name="host" value="localhost" /></label><br>
+    <label>Port: <input type="number" name="port" value="3306" /></label><br>
+    <label>Datenbank: <input type="text" name="database" /></label><br>
+    <label>Benutzername: <input type="text" name="username" /></label><br>
+    <label>Passwort: <input type="password" name="password" /></label><br>
+    <button type="submit">Verbinden</button>
+</form>
+
+<p id="errorMsg" style="color:red;"></p>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+
+        const data = {
+            dbType: formData.get("dbType"),
+            host: formData.get("host"),
+            port: parseInt(formData.get("port")),
+            database: formData.get("database"),
+            username: formData.get("username"),
+            password: formData.get("password")
+        };
+
+        try {
+            const response = await fetch("/connect", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem("sessionId", result.sessionId);
+                window.location.href = "/dashboard";
+            } else {
+                document.getElementById("errorMsg").textContent = result.error || "Verbindung fehlgeschlagen.";
+            }
+        } catch (err) {
+            document.getElementById("errorMsg").textContent = "Fehler: " + err.message;
+        }
+    });
+</script>
+</body>
+</html>

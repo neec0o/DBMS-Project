@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+<h1>Willkommen im Dashboard</h1>
+
+<div>
+    <h2>Datenbanken</h2>
+    <ul id="databases"></ul>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<div id="tables-container" style="display: none;">
+    <h2>Tabellen in <span id="selected-db"></span></h2>
+    <ul id="tables"></ul>
+</div>
+
+<div id="table-content-container" style="display: none;">
+    <h2>Inhalt der Tabelle <span id="selected-table"></span></h2>
+    <input type="text" id="search" placeholder="Suche..." />
+    <button onclick="loadTableContent()">Suchen</button>
+    <table border="1">
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+    </table>
+    <button onclick="prevPage()">Zurück</button>
+    <button onclick="nextPage()">Weiter</button>
+</div>
+
+<script>
+    let sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+        alert("Keine gültige Session gefunden – zurück zur Anmeldung");
+        window.location.href = "/login";
+    }
+
+    let selectedDb = '';
+    let selectedTable = '';
+    let page = 0;
+    const size = 5;
+
+    function logout() {
+        localStorage.removeItem('sessionId');
+        window.location.href = "/login";
+    }
+
+    function checkSession() {
+        fetch("/databases", {
+            headers: { "X-Session-ID": sessionId }
+        }).then(res => {
+            if (res.status === 401) {
+                logout();
+            }
+        });
+    }
+
+    function fetchDatabases() {
+        fetch('/databases', {
+            headers: {
+                'X-Session-ID': sessionId
+            }
+        })
+            .then(res => res.json())
+            .then(databases => {
+                const list = document.getElementById('databases');
+                list.innerHTML = '';
+                databases.forEach(db => {
+                    const li = document.createElement('li');
+                    li.textContent = db;
+                    li.onclick = () => loadTables(db);
+                    list.appendChild(li);
+                });
+            });
+    }
+
+    function loadTables(dbName) {
+        selectedDb = dbName;
+        document.getElementById('selected-db').textContent = dbName;
+        document.getElementById('tables-container').style.display = 'block';
+
+        fetch(`/databases/tables?db=${dbName}`, {
+            headers: {
+                'X-Session-ID': sessionId
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById('tables');
+                list.innerHTML = '';
+                data.tables.forEach(table => {
+                    const li = document.createElement('li');
+                    li.textContent = table;
+                    li.onclick = () => {
+                        selectedTable = table;
+                        page = 0;
+                        loadTableContent();
+                    };
+                    list.appendChild(li);
+                });
+            });
+    }
+
+    function loadTableContent() {
+        const search = document.getElementById('search').value;
+        document.getElementById('selected-table').textContent = selectedTable;
+        document.getElementById('table-content-container').style.display = 'block';
+
+        fetch(`/databases/table-content?db=${selectedDb}&table=${selectedTable}&page=${page}&size=${size}&search=${encodeURIComponent(search)}`, {
+            headers: {
+                'X-Session-ID': sessionId
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const head = document.getElementById('table-head');
+                const body = document.getElementById('table-body');
+                head.innerHTML = '';
+                body.innerHTML = '';
+
+                if (data.length > 0) {
+                    const tr = document.createElement('tr');
+                    Object.keys(data[0]).forEach(col => {
+                        const th = document.createElement('th');
+                        th.textContent = col;
+                        tr.appendChild(th);
+                    });
+                    head.appendChild(tr);
+
+                    data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        Object.values(row).forEach(val => {
+                            const td = document.createElement('td');
+                            td.textContent = val;
+                            tr.appendChild(td);
+                        });
+                        body.appendChild(tr);
+                    });
+                } else {
+                    const tr = document.createElement('tr');
+                    const td = document.createElement('td');
+                    td.textContent = 'Keine Daten gefunden';
+                    td.colSpan = 10;
+                    tr.appendChild(td);
+                    body.appendChild(tr);
+                }
+            });
+    }
+
+    function nextPage() {
+        page++;
+        loadTableContent();
+    }
+
+    function prevPage() {
+        if (page > 0) {
+            page--;
+            loadTableContent();
+        }
+    }
+
+    window.onload = () => {
+        checkSession();
+        fetchDatabases();
+    };
+</script>
+</body>
+</html>
