@@ -3,6 +3,8 @@ package de.devnico.dbms.controller;
 import de.devnico.dbms.model.CreateDatabaseRequest;
 import de.devnico.dbms.model.DbSession;
 import de.devnico.dbms.service.DbSessionService;
+import de.devnico.dbms.service.DatabaseService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,9 @@ import java.util.Map;
 public class DatabaseController {
 
     private final DbSessionService sessionService;
+
+    @Autowired
+    private DatabaseService databaseService;
 
     public DatabaseController(DbSessionService sessionService) {
         this.sessionService = sessionService;
@@ -96,24 +101,55 @@ public class DatabaseController {
             return ResponseEntity.status(401).body(Map.of("error", "Ungültige Session"));
         }
 
-        try (Connection conn = session.getConnection();
-             Statement stmt = conn.createStatement()) {
+        Connection conn = session.getConnection();
+        Statement stmt = null;
+        ResultSet rs = null;
 
-                stmt.execute("USE " + dbName);
+        try {
+            stmt = conn.createStatement();
+            stmt.execute("USE " + dbName);
 
-                // Tabellen abrufen
-                ResultSet rs = conn.getMetaData().getTables(dbName, null, "%", new String[]{"TABLE"});
+            rs = conn.getMetaData().getTables(dbName, null, "%", new String[]{"TABLE"});
 
-                List<String> tables = new ArrayList<>();
-                while (rs.next()) {
-                    tables.add(rs.getString("TABLE_NAME"));
-                }
+            List<String> tables = new ArrayList<>();
+            while (rs.next()) {
+                tables.add(rs.getString("TABLE_NAME"));
+            }
 
-                return ResponseEntity.ok(Map.of("tables", tables));
+            return ResponseEntity.ok(Map.of("tables", tables));
 
+        } catch (SQLException e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+            } catch (SQLException ignored) {}
+        }
+    }
+
+
+    @GetMapping("/table-content")
+    public ResponseEntity<?> getTableContent(
+            @RequestHeader("X-Session-ID") String sessionId,
+            @RequestParam("db") String dbName,
+            @RequestParam("table") String tableName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search
+    ) {
+        DbSession session = sessionService.getSession(sessionId);
+        if (session == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Ungültige Session"));
+        }
+
+        try {
+            List<Map<String, Object>> data = databaseService.getTableContent(session, dbName, tableName, page, size, search);
+            return ResponseEntity.ok(Map.of("data", data));
         } catch (SQLException e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
+
 
 }
